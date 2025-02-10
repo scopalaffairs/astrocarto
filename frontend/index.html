@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Astrocartography Map</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Input form styling */
+        #astroForm {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            position: relative;
+            z-index: 1000;
+        }
+
+        #astroForm label {
+            margin-right: 10px;
+        }
+
+        #astroForm input {
+            margin-right: 20px;
+        }
+
+        #error {
+            color: red;
+            margin-top: 5px;
+        }
+
+        /* Map container */
+        #map {
+            height: 80vh;
+            width: 100%;
+        }
+
+        /* Legend styling */
+        .info.legend {
+            line-height: 18px;
+            color: #555;
+            font-size: 12px;
+        }
+
+        .info.legend i {
+            width: 18px;
+            height: 3px;
+            display: inline-block;
+            margin-right: 8px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="astroForm">
+        <form id="form">
+            <!-- New Name field -->
+            <label for="name">Name:</label>
+            <input type="text" id="name" name="name" required>
+
+            <label for="datetime">Date & Time:</label>
+            <input type="datetime-local" id="datetime" name="datetime" required>
+
+            <label for="birth_lat">Birth Latitude:</label>
+            <input type="number" id="birth_lat" name="birth_lat" step="any" required>
+
+            <label for="birth_lon">Birth Longitude:</label>
+            <input type="number" id="birth_lon" name="birth_lon" step="any" required>
+
+            <button type="submit">Compute Rising Lines</button>
+        </form>
+        <div id="error"></div>
+    </div>
+    <div id="map"></div>
+
+    <!-- Load Leaflet -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    <!-- Load main JS script -->
+    <script src="main.js"></script>
+</body>
+
+</html>

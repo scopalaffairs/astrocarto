@@ -1,0 +1,6 @@
+Flask==2.2.2
+flask-cors==5.0.0
+Werkzeug==2.2.2
+astropy==5.2
+numpy==1.23.5
+scipy==1.15.1
