@@ -2,16 +2,20 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Astrocartography Map</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
     <style>
         body {
             margin: 0;
             padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
         }
 
-        /* Input form styling */
+        h4 {
+            margin-top: 0;
+        }
+
         #astroForm {
             padding: 10px;
             background: rgba(255, 255, 255, 0.9);
@@ -32,7 +36,6 @@
             margin-top: 5px;
         }
 
-        /* Map container */
         #map {
             height: 80vh;
             width: 100%;
@@ -51,6 +54,18 @@
             display: inline-block;
             margin-right: 8px;
         }
+
+        #userList {
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            margin-bottom: 10px;
+        }
+
+        .user-entry {
+            border: 1px solid #ccc;
+            padding: 5px;
+            margin-bottom: 5px;
+        }
     </style>
 </head>
 
@@ -59,23 +74,26 @@
         <form id="form">
             <!-- New Name field -->
             <label for="name">Name:</label>
-            <input type="text" id="name" name="name" required>
+            <input type="text" id="name" name="name" required />
 
             <label for="datetime">Date & Time:</label>
-            <input type="datetime-local" id="datetime" name="datetime" required>
+            <input type="datetime-local" id="datetime" name="datetime" required />
+
+            <!-- New Birth Place field -->
+            <label for="birth_place">Birth Place:</label>
+            <input type="text" id="birth_place" name="birth_place" placeholder="e.g., New York" />
 
             <label for="birth_lat">Birth Latitude:</label>
-            <input type="number" id="birth_lat" name="birth_lat" step="any" required>
+            <input type="number" id="birth_lat" name="birth_lat" step="any" placeholder="e.g., 40.7128" />
 
             <label for="birth_lon">Birth Longitude:</label>
-            <input type="number" id="birth_lon" name="birth_lon" step="any" required>
+            <input type="number" id="birth_lon" name="birth_lon" step="any" placeholder="e.g., -74.0060" />
 
             <button type="submit">Compute Rising Lines</button>
         </form>
         <div id="error"></div>
     </div>
     <div id="map"></div>
-
     <!-- Load Leaflet -->
     <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
     <!-- Load main JS script -->
