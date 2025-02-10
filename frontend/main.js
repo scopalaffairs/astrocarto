@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .then((data) => {
         console.log("API response:", data);
-        const submissionLayer = L.layerGroup();
+        const submissionLayer = L.featureGroup();
         for (const planet in data) {
           if (data.hasOwnProperty(planet)) {
             const planetData = data[planet];
