@@ -50,4 +50,4 @@ No sign-up, no storage, no interpretation.
 
 ## License
 
-MIT License
+BSD 2-Clause License
