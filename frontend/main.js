@@ -206,7 +206,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     console.log("Loading submission payload:", payload);
 
-    fetch("http://127.0.0.1:5050/astro/api/compute_rising_lines", {
+    fetch("/astro/api/compute_rising_lines", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
