@@ -10,6 +10,7 @@ No sign-up, no storage, no interpretation.
 - Calculates planetary lines (ASC, MC, DSC, IC)  
 - Displays them on an interactive map using Leaflet  
 - Allows simple exploration of locations in relation to astrological geometry
+- Supports multiple inputs for comparing charts in group or family contexts
 
 ## Features
 
