@@ -314,10 +314,21 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // On form submission:
+  // Loading-Funktion
+  function setLoading(isLoading) {
+    const button = document.querySelector('#form button[type="submit"]');
+    const buttonText = button.querySelector(".button-text");
+    const loadingText = button.querySelector(".loading-text");
+
+    button.disabled = isLoading;
+    buttonText.style.display = isLoading ? "none" : "inline";
+    loadingText.style.display = isLoading ? "inline" : "none";
+  }
+
   form.addEventListener("submit", (e) => {
     e.preventDefault();
+    setLoading(true); // Loading aktivieren beim Submit
     errorDiv.textContent = "";
-
     const userName = document.getElementById("name").value;
     const datetime = document.getElementById("datetime").value;
     let birth_lat = document.getElementById("birth_lat").value;
@@ -332,6 +343,7 @@ document.addEventListener("DOMContentLoaded", () => {
     ) {
       errorDiv.textContent =
         "Please fill out all required fields (or provide a valid city name).";
+      setLoading(false); // Loading deaktivieren bei Validierungsfehlern
       return;
     }
 
@@ -354,9 +366,9 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       // Store the submission.
       userSubmissionsGlobal.push(submissionData);
-      // localStorage.setItem("userSubmissions", JSON.stringify(userSubmissionsGlobal));
       addUserEntryToUI(submissionData);
       loadSubmission(submissionData);
+      setLoading(false); // Loading deaktivieren nach API-Call
     }
 
     // If a city name is provided, fetch its coordinates via Nominatim.
@@ -373,11 +385,13 @@ document.addEventListener("DOMContentLoaded", () => {
             proceedSubmission(coords);
           } else {
             errorDiv.textContent = "City not found. Please check your input.";
+            setLoading(false); // Loading deaktivieren bei Geocoding-Fehlern
           }
         })
         .catch((error) => {
           console.error("Geocoding error:", error);
           errorDiv.textContent = "Error fetching city data.";
+          setLoading(false); // Loading deaktivieren bei Geocoding-Fehlern
         });
     } else {
       proceedSubmission();

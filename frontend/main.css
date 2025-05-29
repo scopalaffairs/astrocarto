@@ -1,0 +1,223 @@
+ body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            overflow: hidden;
+        }
+
+        h4 {
+            margin-top: 0;
+        }
+
+        #map {
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        /* Collapsible Panel Base Styles */
+        .collapsible-panel {
+            position: fixed;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            transition: transform 0.3s ease-in-out;
+            max-width: 400px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        /* Form Panel - Top Right */
+        #formPanel {
+            top: 20px;
+            right: 80px;
+            transform: translateX(calc(100% + 80px));
+        }
+
+        #formPanel.open {
+            transform: translateX(0);
+        }
+
+        /* Users Panel - Top Right */
+        #usersPanel {
+            top: 20px;
+            right: 80px;
+            transform: translateX(calc(100% + 80px));
+        }
+
+        #usersPanel.open {
+            transform: translateX(0);
+        }
+
+        /* Legend Panel - Bottom Right */
+        #legendPanel {
+            bottom: 20px;
+            right: 80px;
+            transform: translateX(calc(100% + 80px));
+        }
+
+        #legendPanel.open {
+            transform: translateX(0);
+        }
+
+        /* Burger Button Styles */
+        .burger-btn {
+            position: fixed;
+            width: 50px;
+            height: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+            z-index: 1001;
+            transition: background-color 0.2s ease;
+        }
+
+        .burger-btn:hover {
+            background: rgba(255, 255, 255, 1);
+        }
+
+        .burger-btn.active {
+            background: rgba(52, 152, 219, 0.9);
+            color: white;
+        }
+
+        #formBurger {
+            top: 20px;
+            right: 20px;
+        }
+
+        #usersBurger {
+            top: 80px;
+            right: 20px;
+        }
+
+        #legendBurger {
+            bottom: 20px;
+            right: 20px;
+        }
+
+        /* Panel Content Styles */
+        .panel-content {
+            padding: 20px;
+        }
+
+        .panel-header {
+            font-weight: bold;
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #333;
+        }
+
+        /* Form Styles */
+        #astroForm label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+        }
+
+        #astroForm input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        #astroForm button {
+            width: 100%;
+            padding: 10px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        #astroForm button:hover {
+            background: #2980b9;
+        }
+
+        #error {
+            color: #e74c3c;
+            margin-top: 10px;
+            font-size: 12px;
+        }
+
+        /* User List Styles */
+        .user-entry {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            background: #f9f9f9;
+        }
+
+        .user-entry button {
+            margin-left: 5px;
+            padding: 4px 8px;
+            font-size: 11px;
+            border: none;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .edit-btn {
+            background: #f39c12;
+            color: white;
+        }
+
+        .delete-btn {
+            background: #e74c3c;
+            color: white;
+        }
+
+        /* Legend Styles */
+        .legend-content {
+            line-height: 18px;
+            color: #555;
+            font-size: 12px;
+        }
+
+        .legend-content label {
+            cursor: pointer;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .legend-buttons {
+            margin-bottom: 15px;
+        }
+
+        .legend-buttons button {
+            margin-right: 5px;
+            padding: 4px 8px;
+            font-size: 11px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        .legend-buttons button:hover {
+            background: #f0f0f0;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .collapsible-panel {
+                max-width: calc(100vw - 40px);
+                max-height: 70vh;
+            }
+        }
