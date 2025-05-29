@@ -97,12 +97,8 @@
             <label for="birth_place">Birth Place:</label>
             <input type="text" id="birth_place" name="birth_place" placeholder="e.g., New York" />
 
-            <label for="birth_lat">Birth Latitude:</label>
-            <input type="number" id="birth_lat" name="birth_lat" step="any" placeholder="e.g., 40.7128" />
-
-            <label for="birth_lon">Birth Longitude:</label>
-            <input type="number" id="birth_lon" name="birth_lon" step="any" placeholder="e.g., -74.0060" />
-
+            <input hidden type="number" id="birth_lat" name="birth_lat" step="any" placeholder="e.g., 40.7128" />
+            <input hidden type="number" id="birth_lon" name="birth_lon" step="any" placeholder="e.g., -74.0060" />
             <button type="submit">Compute Rising Lines</button>
         </form>
         <div id="error"></div>
