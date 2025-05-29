@@ -11,63 +11,76 @@
             margin: 0;
             padding: 0;
             font-family: Arial, Helvetica, sans-serif;
-        }
-
-        h4 {
-            margin-top: 0;
+            box-sizing: border-box;
         }
 
         #astroForm {
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            position: relative;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.95);
             z-index: 1000;
+            max-width: 800px;
+            margin: 0 auto;
         }
 
-        #astroForm label {
-            margin-right: 10px;
+        #form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px 20px;
+            align-items: flex-start;
         }
 
-        #astroForm input {
-            margin-right: 20px;
+        #form label {
+            flex-basis: 100%;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        #form input,
+        #form button {
+            flex: 1 1 250px;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        #form button {
+            background-color: #333;
+            color: #fff;
+            cursor: pointer;
+            border: none;
+            margin-top: 15px;
+        }
+
+        #form button:hover {
+            background-color: #555;
         }
 
         #error {
             color: red;
-            margin-top: 5px;
+            margin-top: 10px;
         }
 
-        #map {
-            height: 80vh;
-            width: 100%;
-        }
+        @media (max-width: 600px) {
+            #form {
+                flex-direction: column;
+            }
 
-        /* Legend styling */
-        .info.legend {
-            line-height: 18px;
-            color: #555;
-            font-size: 12px;
-        }
-
-        .info.legend i {
-            width: 18px;
-            height: 3px;
-            display: inline-block;
-            margin-right: 8px;
-        }
-
-        #userList {
-            padding: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            margin-bottom: 10px;
+            #form input,
+            #form button {
+                width: 100%;
+            }
         }
 
         .user-entry {
             border: 1px solid #ccc;
-            padding: 5px;
-            margin-bottom: 5px;
+            padding: 8px;
+            margin-top: 10px;
+            font-size: 14px;
+            background-color: #f9f9f9;
         }
     </style>
+
 </head>
 
 <body>
