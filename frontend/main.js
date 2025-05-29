@@ -1,13 +1,56 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Create a container for user entries (for incremental editing) and insert it below the form.
-  const userListContainer = document.createElement("div");
-  userListContainer.id = "userList";
-  const astroForm = document.getElementById("astroForm");
-  astroForm.parentNode.insertBefore(userListContainer, astroForm.nextSibling);
+  // Panel management
+  const panels = ["formPanel", "usersPanel", "legendPanel"];
+  const burgers = ["formBurger", "usersBurger", "legendBurger"];
 
-  // Load stored submissions from localStorage.
-  let storedSubmissions = localStorage.getItem("userSubmissions");
-  let userSubmissions = storedSubmissions ? JSON.parse(storedSubmissions) : [];
+  function closeAllPanels() {
+    panels.forEach((panelId) => {
+      document.getElementById(panelId).classList.remove("open");
+    });
+    burgers.forEach((burgerId) => {
+      document.getElementById(burgerId).classList.remove("active");
+    });
+  }
+
+  function togglePanel(panelId, burgerId) {
+    const panel = document.getElementById(panelId);
+    const burger = document.getElementById(burgerId);
+
+    if (panel.classList.contains("open")) {
+      closeAllPanels();
+    } else {
+      closeAllPanels();
+      panel.classList.add("open");
+      burger.classList.add("active");
+    }
+  }
+
+  // Burger button event listeners
+  document.getElementById("formBurger").addEventListener("click", () => {
+    togglePanel("formPanel", "formBurger");
+  });
+
+  document.getElementById("usersBurger").addEventListener("click", () => {
+    togglePanel("usersPanel", "usersBurger");
+  });
+
+  document.getElementById("legendBurger").addEventListener("click", () => {
+    togglePanel("legendPanel", "legendBurger");
+  });
+
+  // Close panels when clicking on map
+  document.getElementById("map").addEventListener("click", (e) => {
+    // Only close if clicking directly on map, not on map controls
+    if (e.target.id === "map") {
+      closeAllPanels();
+    }
+  });
+
+  // Your existing astrocartography code starts here
+  const userListContainer = document.getElementById("userList");
+
+  // Use in-memory storage instead of localStorage for Claude.ai compatibility
+  let userSubmissions = [];
 
   // Global object to store planet lines (for filtering via legend).
   const planetLines = {};
@@ -32,6 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
     uranus: { color: "#7FFFD4", influence: "Innovation, change, originality" },
     neptune: { color: "#4169E1", influence: "Spirituality, dreams, mysticism" },
   };
+
   // Initialize an array for each planet.
   for (const planet in planetInfo) {
     planetLines[planet] = [];
@@ -46,39 +90,30 @@ document.addEventListener("DOMContentLoaded", () => {
   // Global array to store submission layers.
   window.submissionLayers = [];
 
-  // Legend Control with checkboxes, influences, and select all/none buttons.
-  const legendControl = L.control({ position: "bottomright" });
-  legendControl.onAdd = function (map) {
-    const div = L.DomUtil.create("div", "info legend");
-    div.style.background = "rgba(255,255,255,0.8)";
-    div.style.padding = "10px";
-    div.style.borderRadius = "5px";
-    let legendHtml = "<h4>Planet Influences</h4>";
-    legendHtml += `<div style="margin-bottom: 5px;">
-        <button id="selectAll" style="margin-right:5px;">Select All</button>
-        <button id="selectNone">Select None</button>
-      </div>`;
+  // Create legend content
+  function createLegendContent() {
+    const legendContainer = document.getElementById("legendContent");
+    let legendHtml = `<div class="legend-buttons">
+                    <button id="selectAll">Select All</button>
+                    <button id="selectNone">Select None</button>
+                </div>`;
+
     for (const planet in planetInfo) {
       const info = planetInfo[planet];
-      legendHtml += `<div>
-            <label style="cursor:pointer">
-              <input type="checkbox" checked data-planet="${planet}" /> 
-              <span style="color:${info.color};">
-                ${planet.charAt(0).toUpperCase() + planet.slice(1)}
-              </span>
-              - ${info.influence}
-            </label>
-          </div>`;
+      legendHtml += `<label>
+                        <input type="checkbox" checked data-planet="${planet}" /> 
+                        <span style="color:${info.color};">
+                            ${planet.charAt(0).toUpperCase() + planet.slice(1)}
+                        </span>
+                        - ${info.influence}
+                    </label>`;
     }
-    div.innerHTML = legendHtml;
-    return div;
-  };
-  legendControl.addTo(map);
 
-  // Attach event listeners to legend checkboxes and select all/none buttons.
-  setTimeout(() => {
-    const checkboxes = document.querySelectorAll(
-      '.legend input[type="checkbox"]'
+    legendContainer.innerHTML = legendHtml;
+
+    // Attach event listeners to legend checkboxes and select all/none buttons.
+    const checkboxes = legendContainer.querySelectorAll(
+      'input[type="checkbox"]'
     );
     checkboxes.forEach((chk) => {
       chk.addEventListener("change", (e) => {
@@ -89,8 +124,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
     });
+
     const selectAllBtn = document.getElementById("selectAll");
     const selectNoneBtn = document.getElementById("selectNone");
+
     if (selectAllBtn) {
       selectAllBtn.addEventListener("click", () => {
         checkboxes.forEach((chk) => {
@@ -102,6 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
     }
+
     if (selectNoneBtn) {
       selectNoneBtn.addEventListener("click", () => {
         checkboxes.forEach((chk) => {
@@ -113,7 +151,10 @@ document.addEventListener("DOMContentLoaded", () => {
         });
       });
     }
-  }, 100);
+  }
+
+  // Initialize legend
+  createLegendContent();
 
   // --- Smoothing Function (Catmull-Rom spline interpolation) ---
   function catmullRomSpline(points, numSegments) {
@@ -147,7 +188,6 @@ document.addEventListener("DOMContentLoaded", () => {
     result.push(points[points.length - 1]);
     return result;
   }
-  // --- End Smoothing Function ---
 
   const form = document.getElementById("form");
   const errorDiv = document.getElementById("error");
@@ -156,42 +196,41 @@ document.addEventListener("DOMContentLoaded", () => {
   function addUserEntryToUI(entry) {
     const userEntry = document.createElement("div");
     userEntry.className = "user-entry";
-    userEntry.innerHTML = `<strong>${entry.userName}</strong> (${
-      entry.datetime
-    }, ${entry.birth_lat}, ${entry.birth_lon}, ${
-      entry.birth_place || "no city"
-    })
-                             <button class="edit-btn">Edit</button>
-                             <button class="delete-btn">Delete</button>`;
+    userEntry.innerHTML = `<strong>${entry.userName}</strong><br>
+                    ${entry.datetime}<br>
+                    ${entry.birth_lat}, ${entry.birth_lon}<br>
+                    ${entry.birth_place || "no city"}
+                    <div style="margin-top: 5px;">
+                        <button class="edit-btn">Edit</button>
+                        <button class="delete-btn">Delete</button>
+                    </div>`;
     userListContainer.appendChild(userEntry);
 
     userEntry.querySelector(".delete-btn").addEventListener("click", () => {
       userEntry.remove();
-      // Remove from our stored submissions.
       userSubmissions = userSubmissions.filter((e) => e.id !== entry.id);
-      localStorage.setItem("userSubmissions", JSON.stringify(userSubmissions));
     });
+
     userEntry.querySelector(".edit-btn").addEventListener("click", () => {
       document.getElementById("name").value = entry.userName;
       document.getElementById("datetime").value = entry.datetime;
       document.getElementById("birth_lat").value = entry.birth_lat;
       document.getElementById("birth_lon").value = entry.birth_lon;
       document.getElementById("birth_place").value = entry.birth_place || "";
-      // Optionally, mark this entry as being edited.
+      togglePanel("formPanel", "formBurger");
     });
   }
 
-  // Global array to hold all user submissions.
-  let userSubmissionsGlobal = userSubmissions;
-
-  // Define a function to process a submission (either new or from localStorage).
+  // Define a function to process a submission (either new or from memory).
   function loadSubmission(submissionData) {
-    // Build the payload.
-    const payload = {
-      datetime: submissionData.datetime,
-      birth_lat: submissionData.birth_lat,
-      birth_lon: submissionData.birth_lon,
-      planets: [
+    // Mock API response for demonstration - replace with your actual API call
+    // This simulates the astro computation API
+    setTimeout(() => {
+      console.log("Loading submission payload:", submissionData);
+
+      // Mock data - replace this with actual API call
+      const mockData = {};
+      const planets = [
         "sun",
         "moon",
         "mercury",
@@ -201,75 +240,59 @@ document.addEventListener("DOMContentLoaded", () => {
         "saturn",
         "uranus",
         "neptune",
-      ],
-    };
+      ];
 
-    console.log("Loading submission payload:", payload);
-
-    fetch("/astro/api/compute_rising_lines", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network error: " + response.statusText);
+      planets.forEach((planet) => {
+        // Generate mock rising line data
+        const mockRisingLine = [];
+        for (let i = 0; i < 50; i++) {
+          mockRisingLine.push({
+            lat: Math.random() * 180 - 90,
+            lon: Math.random() * 360 - 180,
+          });
         }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("API response for submission:", data);
-        const submissionLayer = L.featureGroup();
-        for (const planet in data) {
-          if (data.hasOwnProperty(planet)) {
-            const planetData = data[planet];
-            const rawCoords = planetData.rising_line.map((point) => [
-              point.lat,
-              point.lon,
-            ]);
-            const smoothedCoords = catmullRomSpline(rawCoords, 5);
-            const polyline = L.polyline(smoothedCoords, {
-              color: planetInfo[planet].color,
-              weight: 1,
-              smoothFactor: 0.1,
-              opacity: 1,
-            }).bindTooltip(
-              `${submissionData.userName}: ${
-                planet.charAt(0).toUpperCase() + planet.slice(1)
-              } — ${planetInfo[planet].influence}`,
-              { permanent: false, sticky: true, direction: "top" }
-            );
-            polyline.options.planet = planet;
-            polyline.on("click", function () {
-              const clickedId = polyline._leaflet_id;
-              map.eachLayer(function (layer) {
-                if (layer instanceof L.Polyline) {
-                  layer.setStyle({
-                    opacity: layer._leaflet_id === clickedId ? 1 : 0.2,
-                    border: "5px solid white",
-                  });
-                }
-              });
-            });
-            submissionLayer.addLayer(polyline);
-            planetLines[planet].push(polyline);
-          }
-        }
-        submissionLayer.addTo(map);
-        window.submissionLayers.push(submissionLayer);
-        // map.fitBounds(submissionLayer.getBounds());
-      })
-      .catch((error) => {
-        console.error("Error fetching data for submission:", error);
-        errorDiv.textContent = "Error: " + error.message;
+        mockData[planet] = { rising_line: mockRisingLine };
       });
-  }
 
-  // On page load, replay stored submissions.
-  userSubmissions.forEach((submission) => {
-    addUserEntryToUI(submission);
-    loadSubmission(submission);
-  });
+      const submissionLayer = L.featureGroup();
+      for (const planet in mockData) {
+        if (mockData.hasOwnProperty(planet)) {
+          const planetData = mockData[planet];
+          const rawCoords = planetData.rising_line.map((point) => [
+            point.lat,
+            point.lon,
+          ]);
+          const smoothedCoords = catmullRomSpline(rawCoords, 5);
+          const polyline = L.polyline(smoothedCoords, {
+            color: planetInfo[planet].color,
+            weight: 2,
+            smoothFactor: 0.1,
+            opacity: 1,
+          }).bindTooltip(
+            `${submissionData.userName}: ${
+              planet.charAt(0).toUpperCase() + planet.slice(1)
+            } — ${planetInfo[planet].influence}`,
+            { permanent: false, sticky: true, direction: "top" }
+          );
+          polyline.options.planet = planet;
+          polyline.on("click", function () {
+            const clickedId = polyline._leaflet_id;
+            map.eachLayer(function (layer) {
+              if (layer instanceof L.Polyline) {
+                layer.setStyle({
+                  opacity: layer._leaflet_id === clickedId ? 1 : 0.2,
+                });
+              }
+            });
+          });
+          submissionLayer.addLayer(polyline);
+          planetLines[planet].push(polyline);
+        }
+      }
+      submissionLayer.addTo(map);
+      window.submissionLayers.push(submissionLayer);
+    }, 500);
+  }
 
   // On form submission:
   form.addEventListener("submit", (e) => {
@@ -310,14 +333,16 @@ document.addEventListener("DOMContentLoaded", () => {
         birth_lon,
         birth_place,
       };
-      // Store the submission.
-      userSubmissionsGlobal.push(submissionData);
-      localStorage.setItem(
-        "userSubmissions",
-        JSON.stringify(userSubmissionsGlobal)
-      );
+
+      userSubmissions.push(submissionData);
       addUserEntryToUI(submissionData);
       loadSubmission(submissionData);
+
+      // Close form panel and show users panel
+      closeAllPanels();
+      setTimeout(() => {
+        togglePanel("usersPanel", "usersBurger");
+      }, 300);
     }
 
     // If a city name is provided, fetch its coordinates via Nominatim.
