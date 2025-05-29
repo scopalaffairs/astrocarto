@@ -1,13 +1,58 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Create a container for user entries (for incremental editing) and insert it below the form.
-  const userListContainer = document.createElement("div");
-  userListContainer.id = "userList";
-  const astroForm = document.getElementById("astroForm");
-  astroForm.parentNode.insertBefore(userListContainer, astroForm.nextSibling);
+  // Panel management
+  const panels = ["formPanel", "usersPanel", "legendPanel"];
+  const burgers = ["formBurger", "usersBurger", "legendBurger"];
 
-  // Load stored submissions from localStorage.
-  let storedSubmissions = localStorage.getItem("userSubmissions");
-  let userSubmissions = storedSubmissions ? JSON.parse(storedSubmissions) : [];
+  function closeAllPanels() {
+    panels.forEach((panelId) => {
+      document.getElementById(panelId).classList.remove("open");
+    });
+    burgers.forEach((burgerId) => {
+      document.getElementById(burgerId).classList.remove("active");
+    });
+  }
+
+  function togglePanel(panelId, burgerId) {
+    const panel = document.getElementById(panelId);
+    const burger = document.getElementById(burgerId);
+
+    if (panel.classList.contains("open")) {
+      closeAllPanels();
+    } else {
+      closeAllPanels();
+      panel.classList.add("open");
+      burger.classList.add("active");
+    }
+  }
+
+  // Burger button event listeners
+  document.getElementById("formBurger").addEventListener("click", () => {
+    togglePanel("formPanel", "formBurger");
+  });
+
+  document.getElementById("usersBurger").addEventListener("click", () => {
+    togglePanel("usersPanel", "usersBurger");
+  });
+
+  document.getElementById("legendBurger").addEventListener("click", () => {
+    togglePanel("legendPanel", "legendBurger");
+  });
+
+  // Close panels when clicking on map
+  document.getElementById("map").addEventListener("click", (e) => {
+    // Only close if clicking directly on map, not on map controls
+    if (e.target.id === "map") {
+      closeAllPanels();
+    }
+  });
+
+  // === YOUR ORIGINAL ASTROCARTOGRAPHY CODE (RESTORED) ===
+  const userListContainer = document.getElementById("userList");
+
+  // Load stored submissions from localStorage (but use memory for Claude.ai).
+  // let storedSubmissions = localStorage.getItem("userSubmissions");
+  // let userSubmissions = storedSubmissions ? JSON.parse(storedSubmissions) : [];
+  let userSubmissions = []; // Use memory storage for Claude.ai
 
   // Global object to store planet lines (for filtering via legend).
   const planetLines = {};
@@ -46,74 +91,70 @@ document.addEventListener("DOMContentLoaded", () => {
   // Global array to store submission layers.
   window.submissionLayers = [];
 
-  // Legend Control with checkboxes, influences, and select all/none buttons.
-  const legendControl = L.control({ position: "bottomright" });
-  legendControl.onAdd = function (map) {
-    const div = L.DomUtil.create("div", "info legend");
-    div.style.background = "rgba(255,255,255,0.8)";
-    div.style.padding = "10px";
-    div.style.borderRadius = "5px";
-    let legendHtml = "<h4>Planet Influences</h4>";
-    legendHtml += `<div style="margin-bottom: 5px;">
-        <button id="selectAll" style="margin-right:5px;">Select All</button>
-        <button id="selectNone">Select None</button>
-      </div>`;
+  // Create legend content and attach event listeners
+  function createLegendContent() {
+    const legendContainer = document.getElementById("legendContent");
+    let legendHtml = `<div class="legend-buttons">
+                    <button id="selectAll">Select All</button>
+                    <button id="selectNone">Select None</button>
+                </div>`;
+
     for (const planet in planetInfo) {
       const info = planetInfo[planet];
-      legendHtml += `<div>
-            <label style="cursor:pointer">
-              <input type="checkbox" checked data-planet="${planet}" /> 
-              <span style="color:${info.color};">
-                ${planet.charAt(0).toUpperCase() + planet.slice(1)}
-              </span>
-              - ${info.influence}
-            </label>
-          </div>`;
+      legendHtml += `<label>
+                        <input type="checkbox" checked data-planet="${planet}" /> 
+                        <span style="color:${info.color};">
+                            ${planet.charAt(0).toUpperCase() + planet.slice(1)}
+                        </span>
+                        - ${info.influence}
+                    </label>`;
     }
-    div.innerHTML = legendHtml;
-    return div;
-  };
-  legendControl.addTo(map);
 
-  // Attach event listeners to legend checkboxes and select all/none buttons.
-  setTimeout(() => {
-    const checkboxes = document.querySelectorAll(
-      '.legend input[type="checkbox"]'
-    );
-    checkboxes.forEach((chk) => {
-      chk.addEventListener("change", (e) => {
-        const planet = e.target.getAttribute("data-planet");
-        const checked = e.target.checked;
-        planetLines[planet].forEach((polyline) => {
-          polyline.setStyle({ opacity: checked ? 1 : 0 });
-        });
-      });
-    });
-    const selectAllBtn = document.getElementById("selectAll");
-    const selectNoneBtn = document.getElementById("selectNone");
-    if (selectAllBtn) {
-      selectAllBtn.addEventListener("click", () => {
-        checkboxes.forEach((chk) => {
-          chk.checked = true;
-          const planet = chk.getAttribute("data-planet");
+    legendContainer.innerHTML = legendHtml;
+
+    // Attach event listeners to legend checkboxes and select all/none buttons.
+    setTimeout(() => {
+      const checkboxes = document.querySelectorAll(
+        '#legendContent input[type="checkbox"]'
+      );
+      checkboxes.forEach((chk) => {
+        chk.addEventListener("change", (e) => {
+          const planet = e.target.getAttribute("data-planet");
+          const checked = e.target.checked;
           planetLines[planet].forEach((polyline) => {
-            polyline.setStyle({ opacity: 1 });
+            polyline.setStyle({ opacity: checked ? 1 : 0 });
           });
         });
       });
-    }
-    if (selectNoneBtn) {
-      selectNoneBtn.addEventListener("click", () => {
-        checkboxes.forEach((chk) => {
-          chk.checked = false;
-          const planet = chk.getAttribute("data-planet");
-          planetLines[planet].forEach((polyline) => {
-            polyline.setStyle({ opacity: 0 });
+      const selectAllBtn = document.getElementById("selectAll");
+      const selectNoneBtn = document.getElementById("selectNone");
+      if (selectAllBtn) {
+        selectAllBtn.addEventListener("click", () => {
+          checkboxes.forEach((chk) => {
+            chk.checked = true;
+            const planet = chk.getAttribute("data-planet");
+            planetLines[planet].forEach((polyline) => {
+              polyline.setStyle({ opacity: 1 });
+            });
           });
         });
-      });
-    }
-  }, 100);
+      }
+      if (selectNoneBtn) {
+        selectNoneBtn.addEventListener("click", () => {
+          checkboxes.forEach((chk) => {
+            chk.checked = false;
+            const planet = chk.getAttribute("data-planet");
+            planetLines[planet].forEach((polyline) => {
+              polyline.setStyle({ opacity: 0 });
+            });
+          });
+        });
+      }
+    }, 100);
+  }
+
+  // Initialize legend
+  createLegendContent();
 
   // --- Smoothing Function (Catmull-Rom spline interpolation) ---
   function catmullRomSpline(points, numSegments) {
@@ -161,15 +202,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }, ${entry.birth_lat}, ${entry.birth_lon}, ${
       entry.birth_place || "no city"
     })
-                             <button class="edit-btn">Edit</button>
-                             <button class="delete-btn">Delete</button>`;
+                <button class="edit-btn">Edit</button>
+                <button class="delete-btn">Delete</button>`;
     userListContainer.appendChild(userEntry);
 
     userEntry.querySelector(".delete-btn").addEventListener("click", () => {
       userEntry.remove();
       // Remove from our stored submissions.
       userSubmissions = userSubmissions.filter((e) => e.id !== entry.id);
-      localStorage.setItem("userSubmissions", JSON.stringify(userSubmissions));
+      // localStorage.setItem("userSubmissions", JSON.stringify(userSubmissions));
     });
     userEntry.querySelector(".edit-btn").addEventListener("click", () => {
       document.getElementById("name").value = entry.userName;
@@ -177,7 +218,8 @@ document.addEventListener("DOMContentLoaded", () => {
       document.getElementById("birth_lat").value = entry.birth_lat;
       document.getElementById("birth_lon").value = entry.birth_lon;
       document.getElementById("birth_place").value = entry.birth_place || "";
-      // Optionally, mark this entry as being edited.
+      // Show form panel when editing
+      togglePanel("formPanel", "formBurger");
     });
   }
 
@@ -312,10 +354,7 @@ document.addEventListener("DOMContentLoaded", () => {
       };
       // Store the submission.
       userSubmissionsGlobal.push(submissionData);
-      localStorage.setItem(
-        "userSubmissions",
-        JSON.stringify(userSubmissionsGlobal)
-      );
+      // localStorage.setItem("userSubmissions", JSON.stringify(userSubmissionsGlobal));
       addUserEntryToUI(submissionData);
       loadSubmission(submissionData);
     }
